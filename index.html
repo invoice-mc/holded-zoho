@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Holded · Zoho CRM</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    :root {
+      --bg: #ffffff;
+      --bg2: #f5f5f5;
+      --bg3: #efefef;
+      --border: rgba(0,0,0,0.1);
+      --border2: rgba(0,0,0,0.2);
+      --text: #1a1a1a;
+      --text2: #666;
+      --text3: #999;
+      --accent: #0f172a;
+      --accent-fg: #ffffff;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --success-bg: #eaf3de; --success-text: #27500a;
+      --warn-bg: #faeeda; --warn-text: #633806;
+      --danger-bg: #fcebeb; --danger-text: #791f1f;
+      --info-bg: #e6f1fb; --info-text: #0c447c;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1c1c1e; --bg2: #2c2c2e; --bg3: #3a3a3c;
+        --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.2);
+        --text: #f0f0f0; --text2: #aaa; --text3: #666;
+        --accent: #f0f0f0; --accent-fg: #1a1a1a;
+        --success-bg: #173404; --success-text: #c0dd97;
+        --warn-bg: #412402; --warn-text: #fac775;
+        --danger-bg: #501313; --danger-text: #f09595;
+        --info-bg: #042c53; --info-text: #85b7eb;
+      }
+      body { background: var(--bg2); }
+    }
+
+    /* Layout */
+    .app { max-width: 860px; margin: 0 auto; padding: 20px 16px; }
+
+    /* Header */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .logo {
+      width: 28px; height: 28px; border-radius: 7px; background: #0f172a;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo svg { width: 16px; height: 16px; }
+    .header-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .conn-badge {
+      font-size: 11px; padding: 3px 9px; border-radius: 20px;
+      background: var(--bg3); color: var(--text2);
+      display: flex; align-items: center; gap: 5px;
+    }
+    .conn-badge.connected { background: var(--success-bg); color: var(--success-text); }
+    .conn-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+    /* Config panel */
+    .config-panel {
+      background: var(--bg); border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg); padding: 16px; margin-bottom: 20px;
+    }
+    .config-title { font-size: 13px; font-weight: 500; margin-bottom: 12px; color: var(--text2); }
+    .config-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+    .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .config-hint { font-size: 11px; color: var(--text3); margin-top: 6px; }
+
+    /* Form elements */
+    input, select, textarea {
+      width: 100%; padding: 8px 10px; font-size: 13px;
+      border: 0.5px solid var(--border2); border-radius: var(--radius);
+      background: var(--bg); color: var(--text);
+      font-family: inherit; outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(15,23,42,0.08);
+    }
+    textarea { resize: vertical; }
+
+    /* Buttons */
+    .btn-primary {
+      padding: 8px 18px; font-size: 13px; font-weight: 500;
+      background: var(--accent); color: var(--accent-fg);
+      border: none; border-radius: var(--radius); cursor: pointer;
+      white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;
+      transition: opacity 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-secondary {
+      padding: 7px 14px; font-size: 13px;
+      background: none; color: var(--text);
+      border: 0.5px solid var(--border2); border-radius: var(--radius);
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+      transition: background 0.15s;
+    }
+    .btn-secondary:hover { background: var(--bg3); }
+    .btn-icon {
+      background: none; border: none; cursor: pointer;
+      color: var(--text2); padding: 6px; border-radius: var(--radius);
+      display: flex; align-items: center;
+      transition: color 0.15s, background 0.15s;
+    }
+    .btn-icon:hover { color: var(--text); background: var(--bg3); }
+
+    /* Tabs */
+    .tabs {
+      display: flex; gap: 2px;
+      border-bottom: 0.5px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 9px 16px; font-size: 13px; cursor: pointer;
+      border: none; background: none; color: var(--text2);
+      border-bottom: 2px solid transparent; margin-bottom: -0.5px;
+      display: flex; align-items: center; gap: 6px;
+      transition: color 0.15s;
+    }
+    .tab.active { color: var(--text); border-bottom-color: var(--text); font-weight: 500; }
+    .tab:hover:not(.active) { color: var(--text); }
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* Metrics */
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .metric {
+      background: var(--bg); border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg); padding: 14px 16px;
+    }
+    .metric-label { font-size: 11px; color: var(--text2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .metric-val { font-size: 22px; font-weight: 600; color: var(--text); }
+
+    /* Card */
+    .card {
+      background: var(--bg); border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg); padding: 16px 20px; margin-bottom: 16px;
+    }
+    .card-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 14px;
+    }
+    .card-title { font-size: 13px; font-weight: 500; color: var(--text); }
+
+    /* Invoice list */
+    .invoice-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 11px 0; border-bottom: 0.5px solid var(--border);
+      cursor: pointer; transition: background 0.1s;
+    }
+    .invoice-row:last-child { border-bottom: none; }
+    .invoice-row:hover { background: var(--bg2); margin: 0 -20px; padding: 11px 20px; border-radius: 4px; }
+    .inv-num { font-size: 13px; font-weight: 500; color: var(--text); }
+    .inv-meta { font-size: 11px; color: var(--text2); margin-top: 2px; }
+    .inv-right { display: flex; align-items: center; gap: 12px; }
+    .inv-amount { font-size: 14px; font-weight: 500; color: var(--text); }
+
+    /* Badge */
+    .badge {
+      font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 500;
+    }
+    .badge-paid { background: var(--success-bg); color: var(--success-text); }
+    .badge-pending { background: var(--warn-bg); color: var(--warn-text); }
+    .badge-overdue { background: var(--danger-bg); color: var(--danger-text); }
+
+    /* Form invoice */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-full { grid-column: 1 / -1; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-size: 11px; color: var(--text2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* Line items */
+    .line-header {
+      display: grid; grid-template-columns: 2fr 80px 100px 80px 36px;
+      gap: 8px; margin-bottom: 6px;
+    }
+    .line-header span { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; }
+    .line-item {
+      display: grid; grid-template-columns: 2fr 80px 100px 80px 36px;
+      gap: 8px; align-items: center; margin-bottom: 8px;
+    }
+    .total-row {
+      display: flex; justify-content: flex-end; align-items: baseline;
+      gap: 12px; padding-top: 12px; border-top: 0.5px solid var(--border);
+      margin-top: 8px;
+    }
+    .total-label { font-size: 12px; color: var(--text2); }
+    .total-val { font-size: 20px; font-weight: 600; color: var(--text); }
+
+    /* Quick links */
+    .quicklinks { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .quicklink {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg); border: 0.5px solid var(--border);
+      border-radius: var(--radius); padding: 12px 14px;
+      text-decoration: none; color: var(--text); font-size: 13px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .quicklink:hover { background: var(--bg3); border-color: var(--border2); }
+    .quicklink i { font-size: 18px; color: var(--text2); }
+
+    /* States */
+    .empty { text-align: center; padding: 32px; color: var(--text3); font-size: 13px; }
+    .loader { text-align: center; padding: 32px; color: var(--text3); font-size: 13px; }
+    .error-box {
+      background: var(--danger-bg); color: var(--danger-text);
+      border-radius: var(--radius); padding: 10px 14px; font-size: 13px;
+      margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+    }
+
+    /* Info rows */
+    .info-row {
+      display: flex; justify-content: space-between;
+      padding: 8px 0; border-bottom: 0.5px solid var(--border);
+      font-size: 13px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: var(--text2); }
+
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+
+    .ext-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--text2); text-decoration: none;
+      padding: 10px 0;
+    }
+    .ext-link:hover { color: var(--text); }
+
+    @media (max-width: 600px) {
+      .metrics { grid-template-columns: 1fr 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-full { grid-column: 1; }
+      .quicklinks { grid-template-columns: 1fr; }
+      .line-header, .line-item { grid-template-columns: 1fr 60px 80px 60px 30px; }
+      .config-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="8" cy="8" r="6" fill="#38BDF8"/>
+          <path d="M5 8l2.5 2.5L11 5.5" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="header-title">Holded</span>
+      <span class="conn-badge" id="conn-badge">
+        <span class="conn-dot"></span>No conectado
+      </span>
+    </div>
+    <button class="btn-icon" onclick="toggleConfig()" aria-label="Configuración">
+      <i class="ti ti-settings" style="font-size:18px;"></i>
+    </button>
+  </div>
+
+  <!-- Config panel -->
+  <div class="config-panel" id="cfg-panel">
+    <p class="config-title"><i class="ti ti-key" style="font-size:13px; vertical-align:-1px; margin-right:4px;"></i>Configuración de conexión</p>
+    <div class="config-row">
+      <input type="password" id="api-key" placeholder="API Key de Holded" style="flex:1;"/>
+      <button class="btn-primary" onclick="connectHolded()">Conectar</button>
+    </div>
+    <p class="config-hint">Holded → Configuración → Integraciones → API → Copiar API Key</p>
+    <div class="config-grid">
+      <div class="form-group">
+        <label class="form-label">Email del contacto (Zoho CRM)</label>
+        <input type="text" id="contact-email" placeholder="cliente@empresa.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nombre / Empresa</label>
+        <input type="text" id="contact-name" placeholder="Empresa S.L."/>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('facturas')">
+      <i class="ti ti-file-invoice" style="font-size:15px;"></i>Facturas
+    </button>
+    <button class="tab" onclick="switchTab('crear')">
+      <i class="ti ti-plus" style="font-size:15px;"></i>Nueva factura
+    </button>
+    <button class="tab" onclick="switchTab('general')">
+      <i class="ti ti-layout-dashboard" style="font-size:15px;"></i>General
+    </button>
+  </div>
+
+  <!-- TAB: Facturas -->
+  <div id="tab-facturas" class="section active">
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">Total facturado</div>
+        <div class="metric-val" id="m-total">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Pendiente cobro</div>
+        <div class="metric-val" id="m-pending">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Nº facturas</div>
+        <div class="metric-val" id="m-count">—</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Facturas del contacto</span>
+        <button class="btn-secondary" onclick="loadInvoices()" style="font-size:12px; padding:6px 12px;">
+          <i class="ti ti-refresh" style="font-size:13px;"></i>Actualizar
+        </button>
+      </div>
+      <div id="invoices-list">
+        <div class="empty">Conecta tu API Key y pulsa Actualizar.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: Nueva factura -->
+  <div id="tab-crear" class="section">
+    <div class="card">
+      <p class="card-title" style="margin-bottom:14px;">Datos de la factura</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Cliente</label>
+          <input type="text" id="inv-client" placeholder="Nombre o empresa"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Número de factura</label>
+          <input type="text" id="inv-num" placeholder="F-2024-001"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha de emisión</label>
+          <input type="date" id="inv-date"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha de vencimiento</label>
+          <input type="date" id="inv-due"/>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Notas / Observaciones</label>
+          <textarea id="inv-notes" placeholder="Notas opcionales para el cliente..." rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="card-title" style="margin-bottom:12px;">Líneas de factura</p>
+      <div class="line-header">
+        <span>Descripción</span><span>Cantidad</span><span>Precio unit.</span><span>IVA</span><span></span>
+      </div>
+      <div id="line-items"></div>
+      <button class="btn-secondary" onclick="addLine()" style="font-size:12px; padding:6px 12px; margin-top:6px;">
+        <i class="ti ti-plus" style="font-size:13px;"></i>Añadir línea
+      </button>
+      <div class="total-row">
+        <span class="total-label">Total (IVA incluido)</span>
+        <span class="total-val" id="inv-total">0,00 €</span>
+      </div>
+    </div>
+
+    <div id="create-error" class="error-box" style="display:none;">
+      <i class="ti ti-alert-circle" style="font-size:16px;"></i>
+      <span id="create-error-msg"></span>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" onclick="createInvoice()">
+        <i class="ti ti-send" style="font-size:14px;"></i>Crear en Holded
+      </button>
+      <button class="btn-secondary" onclick="previewInvoice()">
+        <i class="ti ti-code" style="font-size:14px;"></i>Vista previa JSON
+      </button>
+    </div>
+  </div>
+
+  <!-- TAB: General -->
+  <div id="tab-general" class="section">
+    <div class="quicklinks">
+      <a class="quicklink" href="https://app.holded.com/sales/invoices" target="_blank">
+        <i class="ti ti-file-invoice"></i>Facturas emitidas
+      </a>
+      <a class="quicklink" href="https://app.holded.com/sales/quotes" target="_blank">
+        <i class="ti ti-file-description"></i>Presupuestos
+      </a>
+      <a class="quicklink" href="https://app.holded.com/contacts" target="_blank">
+        <i class="ti ti-users"></i>Contactos
+      </a>
+      <a class="quicklink" href="https://app.holded.com/treasury" target="_blank">
+        <i class="ti ti-chart-bar"></i>Tesorería
+      </a>
+      <a class="quicklink" href="https://app.holded.com/purchases/invoices" target="_blank">
+        <i class="ti ti-receipt"></i>Facturas recibidas
+      </a>
+      <a class="quicklink" href="https://app.holded.com/accounting" target="_blank">
+        <i class="ti ti-calculator"></i>Contabilidad
+      </a>
+    </div>
+
+    <div class="card">
+      <p class="card-title" style="margin-bottom:12px;">Información de la cuenta</p>
+      <div id="account-info">
+        <div class="empty">Conecta tu API Key para ver los datos de cuenta.</div>
+      </div>
+    </div>
+
+    <a href="https://app.holded.com" target="_blank" class="ext-link">
+      <i class="ti ti-external-link" style="font-size:15px;"></i>Abrir Holded en una nueva pestaña
+    </a>
+  </div>
+
+</div>
+
+<script>
+  let API_KEY = '';
+  let lineCount = 0;
+  let holdedContactId = null;
+
+  function toggleConfig() {
+    const p = document.getElementById('cfg-panel');
+    p.style.display = p.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function switchTab(tab) {
+    const tabs = ['facturas', 'crear', 'general'];
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', tabs[i] === tab));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+  }
+
+  function connectHolded() {
+    const key = document.getElementById('api-key').value.trim();
+    if (!key) { alert('Introduce tu API Key de Holded.'); return; }
+    API_KEY = key;
+    const badge = document.getElementById('conn-badge');
+    badge.className = 'conn-badge connected';
+    badge.innerHTML = '<span class="conn-dot"></span>Conectado';
+    document.getElementById('cfg-panel').style.display = 'none';
+    loadInvoices();
+    loadAccountInfo();
+  }
+
+  async function holdedFetch(path, method = 'GET', body = null) {
+    const opts = {
+      method,
+      headers: { 'key': API_KEY, 'Content-Type': 'application/json', 'Accept': 'application/json' }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch('https://api.holded.com/api' + path, opts);
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error('Error ' + res.status + ': ' + (err || res.statusText));
+    }
+    return res.json();
+  }
+
+  async function findContact(email, name) {
+    try {
+      const data = await holdedFetch('/contacts/v1/contacts?limit=50');
+      const list = Array.isArray(data) ? data : (data.list || []);
+      return list.find(c =>
+        (email && c.email && c.email.toLowerCase() === email.toLowerCase()) ||
+        (name && c.name && c.name.toLowerCase().includes(name.toLowerCase()))
+      )?.id || null;
+    } catch { return null; }
+  }
+
+  async function loadInvoices() {
+    const el = document.getElementById('invoices-list');
+    if (!API_KEY) { el.innerHTML = '<div class="empty">Conecta tu API Key primero.</div>'; return; }
+    el.innerHTML = '<div class="loader"><i class="ti ti-loader-2" style="font-size:20px; display:block; margin:0 auto 8px;"></i>Cargando facturas...</div>';
+    try {
+      const email = document.getElementById('contact-email').value.trim();
+      const name  = document.getElementById('contact-name').value.trim();
+      if (email || name) holdedContactId = await findContact(email, name);
+      const path = holdedContactId
+        ? '/invoicing/v1/documents/invoice?contactId=' + holdedContactId
+        : '/invoicing/v1/documents/invoice?limit=25';
+      const data = await holdedFetch(path);
+      const invoices = Array.isArray(data) ? data : (data.list || []);
+      updateMetrics(invoices);
+      if (!invoices.length) {
+        el.innerHTML = '<div class="empty">No se encontraron facturas.</div>';
+        return;
+      }
+      el.innerHTML = invoices.map(inv => {
+        const date   = inv.date ? new Date(inv.date * 1000).toLocaleDateString('es-ES') : '—';
+        const amount = ((inv.total || 0) / 100).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+        const statusMap = { 1: ['Pagada', 'badge-paid'], 0: ['Pendiente', 'badge-pending'], 2: ['Vencida', 'badge-overdue'] };
+        const [label, cls] = statusMap[inv.status] || ['—', ''];
+        return `<div class="invoice-row" onclick="window.open('https://app.holded.com/sales/invoices/${inv.id}','_blank')">
+          <div>
+            <div class="inv-num">${inv.docNumber || inv.id}</div>
+            <div class="inv-meta">${inv.contactName || '—'} · ${date}</div>
+          </div>
+          <div class="inv-right">
+            <span class="badge ${cls}">${label}</span>
+            <span class="inv-amount">${amount}</span>
+            <i class="ti ti-external-link" style="font-size:14px; color:var(--text3);"></i>
+          </div>
+        </div>`;
+      }).join('');
+    } catch (e) {
+      el.innerHTML = `<div class="error-box"><i class="ti ti-alert-circle" style="font-size:16px;"></i>${e.message}. Verifica tu API Key.</div>`;
+      updateMetrics([]);
+    }
+  }
+
+  function updateMetrics(invoices) {
+    const total   = invoices.reduce((s, i) => s + (i.total || 0), 0) / 100;
+    const pending = invoices.filter(i => i.status === 0).reduce((s, i) => s + (i.total || 0), 0) / 100;
+    document.getElementById('m-total').textContent   = total.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+    document.getElementById('m-pending').textContent = pending.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+    document.getElementById('m-count').textContent   = invoices.length;
+  }
+
+  function addLine() {
+    lineCount++;
+    const id = 'line-' + lineCount;
+    const div = document.createElement('div');
+    div.className = 'line-item';
+    div.id = id;
+    div.innerHTML = `
+      <input type="text" placeholder="Descripción del servicio" oninput="calcTotal()" style="font-size:12px;"/>
+      <input type="number" placeholder="1" min="0" step="0.01" value="1" oninput="calcTotal()" style="font-size:12px;"/>
+      <input type="number" placeholder="0.00" min="0" step="0.01" oninput="calcTotal()" style="font-size:12px;"/>
+      <select oninput="calcTotal()" style="font-size:12px; padding:8px 6px;">
+        <option value="0">0%</option>
+        <option value="4">4%</option>
+        <option value="10" selected>10%</option>
+        <option value="21">21%</option>
+      </select>
+      <button class="btn-icon" onclick="document.getElementById('${id}').remove(); calcTotal();" aria-label="Eliminar">
+        <i class="ti ti-x" style="font-size:15px;"></i>
+      </button>`;
+    document.getElementById('line-items').appendChild(div);
+    if (!document.getElementById('inv-date').value) {
+      document.getElementById('inv-date').value = new Date().toISOString().split('T')[0];
+    }
+  }
+
+  function calcTotal() {
+    let total = 0;
+    document.querySelectorAll('.line-item').forEach(row => {
+      const inputs = row.querySelectorAll('input[type=number]');
+      const qty   = parseFloat(inputs[0].value) || 0;
+      const price = parseFloat(inputs[1].value) || 0;
+      const iva   = parseFloat(row.querySelector('select').value) || 0;
+      total += qty * price * (1 + iva / 100);
+    });
+    document.getElementById('inv-total').textContent = total.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+  }
+
+  function getInvoicePayload() {
+    const items = [];
+    document.querySelectorAll('.line-item').forEach(row => {
+      const desc  = row.querySelectorAll('input[type=text]')[0]?.value || '';
+      const inputs = row.querySelectorAll('input[type=number]');
+      const qty   = parseFloat(inputs[0].value) || 1;
+      const price = parseFloat(inputs[1].value) || 0;
+      const iva   = parseFloat(row.querySelector('select').value) || 0;
+      items.push({ name: desc, units: qty, subtotal: price, tax: [{ name: 'IVA ' + iva + '%', value: iva }] });
+    });
+    const date = document.getElementById('inv-date').value;
+    const due  = document.getElementById('inv-due').value;
+    return {
+      contactName: document.getElementById('inv-client').value,
+      contactId: holdedContactId || undefined,
+      docNumber: document.getElementById('inv-num').value || undefined,
+      date: date ? Math.floor(new Date(date).getTime() / 1000) : Math.floor(Date.now() / 1000),
+      dueDate: due ? Math.floor(new Date(due).getTime() / 1000) : undefined,
+      notes: document.getElementById('inv-notes').value || undefined,
+      items
+    };
+  }
+
+  async function createInvoice() {
+    const errEl  = document.getElementById('create-error');
+    const errMsg = document.getElementById('create-error-msg');
+    errEl.style.display = 'none';
+    if (!API_KEY) { errMsg.textContent = 'Conecta tu API Key primero.'; errEl.style.display = 'flex'; return; }
+    const payload = getInvoicePayload();
+    if (!payload.contactName) { errMsg.textContent = 'Introduce el nombre del cliente.'; errEl.style.display = 'flex'; return; }
+    if (!payload.items.length) { errMsg.textContent = 'Añade al menos una línea de factura.'; errEl.style.display = 'flex'; return; }
+    try {
+      const res = await holdedFetch('/invoicing/v1/documents/invoice', 'POST', payload);
+      const invoiceId = res.id || res.invoiceId;
+      alert('✓ Factura creada correctamente en Holded' + (invoiceId ? '\nID: ' + invoiceId : ''));
+      if (invoiceId) window.open('https://app.holded.com/sales/invoices/' + invoiceId, '_blank');
+      switchTab('facturas');
+      loadInvoices();
+    } catch (e) {
+      errMsg.textContent = 'Error al crear la factura: ' + e.message;
+      errEl.style.display = 'flex';
+    }
+  }
+
+  function previewInvoice() {
+    alert(JSON.stringify(getInvoicePayload(), null, 2));
+  }
+
+  async function loadAccountInfo() {
+    const el = document.getElementById('account-info');
+    try {
+      const data = await holdedFetch('/system/v1/info');
+      el.innerHTML = `
+        <div class="info-row"><span class="info-label">Empresa</span><span>${data.name || '—'}</span></div>
+        <div class="info-row"><span class="info-label">CIF / NIF</span><span>${data.vatnumber || '—'}</span></div>
+        <div class="info-row"><span class="info-label">Email</span><span>${data.email || '—'}</span></div>
+        <div class="info-row"><span class="info-label">Plan</span><span>${data.plan || '—'}</span></div>
+      `;
+    } catch {
+      el.innerHTML = '<div class="empty">No se pudo obtener la información de la cuenta.</div>';
+    }
+  }
+
+  // Init: add first line
+  addLine();
+</script>
+</body>
+</html>
